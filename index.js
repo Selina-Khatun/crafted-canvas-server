@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-require('dotenv').config()
+require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const port = process.eventNames.PORT || 5000;
@@ -11,8 +11,7 @@ app.use(express.json());
 // 6y2DE5u5ttywF57m
 // artAndCraft
 
-const uri =
-  `mongodb+srv://${process.env.BD_USER}:${process.env.BD_PASS}@cluster0.ihxtrhm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.BD_USER}:${process.env.BD_PASS}@cluster0.ihxtrhm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 console.log(uri);
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -27,6 +26,16 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const craftCollection = client.db("craftDB").collection("craft");
+
+    app.post("/craft", async (req, res) => {
+      const newCraft = req.body;
+      console.log(newCraft);
+      const result = await craftCollection.insertOne(newCraft);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -34,7 +43,7 @@ async function run() {
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
