@@ -51,12 +51,49 @@ async function run() {
 
     //  update method starts
 
-    app.get("/coffee/:id", async (req, res) => {
+    app.get("/crafts/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await craftCollection.findOne(query);
       res.send(result);
     });
+    app.put("/crafts/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedCraft = req.body;
+      const craft = {
+        $set: {
+          photoUrl: updatedCraft.photoUrl,
+          itemName: updatedCraft.itemName,
+          subcategoryName: updatedCraft.subcategoryName,
+          price: updatedCraft.price,
+          customization: updatedCraft.customization,
+          rating: updatedCraft.rating,
+          stockStatus: updatedCraft.stockStatus,
+          textarea: updatedCraft.textarea,
+          processingTime: updatedCraft.processingTime,
+        },
+      };
+      const result = await craftCollection.updateOne(filter, craft, options);
+      res.send(result);
+    });
+
+    // filter
+
+    app.get("/crafts", async (req, res) => {
+      try {
+        const { customization } = req.query;
+        const filter = customization ? { customization: JSON.parse(customization) } : {};
+        const cursor = craftCollection.find(filter);
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching crafts:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
