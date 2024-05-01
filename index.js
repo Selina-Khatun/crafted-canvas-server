@@ -98,14 +98,11 @@ async function run() {
 //    console.log(filter);
 
 app.get("/crafts/email/:email", async (req, res) => {
-  try {
+ 
     const email = req.params.email;
     const crafts = await craftCollection.find({ email: email }).toArray();
     res.json(crafts);
-  } catch (error) {
-    console.error("Error fetching crafts by email:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+  
 });
 
 
