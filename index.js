@@ -8,8 +8,6 @@ const port = process.eventNames.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// 6y2DE5u5ttywF57m
-// artAndCraft
 
 const uri = `mongodb+srv://${process.env.BD_USER}:${process.env.BD_PASS}@cluster0.ihxtrhm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 console.log(uri);
@@ -25,7 +23,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const craftCollection = client.db("craftDB").collection("craft");
 
@@ -81,19 +79,36 @@ async function run() {
 
     // filter
 
-    app.get("/crafts", async (req, res) => {
-      try {
-        const { customization } = req.query;
-        const filter = customization ? { customization: JSON.parse(customization) } : {};
-        const cursor = craftCollection.find(filter);
-        const result = await cursor.toArray();
-        res.send(result);
-      } catch (error) {
-        console.error("Error fetching crafts:", error);
-        res.status(500).json({ message: "Internal server error" });
-      }
-    });
-    
+
+//    const filter= craftCollection.aggregate( [
+//     {
+//        $project: {
+//           items: {
+//              $filter: {
+//                 input: "$craftDB",
+//                 as: "email",
+//                 cond: { $eq: [ "$$item.name", ""] }
+//              }
+//           }
+//        }
+//     }
+//  ] )
+
+
+//    console.log(filter);
+
+app.get("/crafts/email/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+    const crafts = await craftCollection.find({ email: email }).toArray();
+    res.json(crafts);
+  } catch (error) {
+    console.error("Error fetching crafts by email:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
